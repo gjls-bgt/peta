@@ -102,7 +102,6 @@
             box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
         }
 
-        /* KARTU INSTRUKSI (Diperbaiki agar mendukung transisi warna kontras) */
         .instruction-card {
             background-color: #e1f5fe;
             border: 2px dashed #4fc3f7;
@@ -133,7 +132,7 @@
             transition: color 0.2s ease;
         }
 
-        /* State Warna Kontras Tinggi untuk Keterbacaan teks saat evaluasi */
+        /* State Warna Kontras Tinggi */
         .instruction-card.state-correct {
             background-color: #e8f5e9 !important;
             border-color: #81c784 !important;
@@ -146,7 +145,7 @@
             border-color: #e57373 !important;
         }
         .instruction-card.state-wrong .hint-label { color: #c62828 !important; }
-        .instruction-card.state-wrong .target-name { color: #b71c1c !important; } /* Teks MERAH GELAP di atas MERAH MUDA terang = Kontras Tinggi! */
+        .instruction-card.state-wrong .target-name { color: #b71c1c !important; }
 
         .control-group {
             display: flex;
@@ -247,10 +246,21 @@
             color: #e1f5fe;
         }
 
+        /* Grup Tombol Menu Depan */
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            width: 100%;
+            max-width: 300px;
+        }
+
         .btn-action {
             background-color: #ffb300;
             color: #4e3400;
-            padding: 12px 40px;
+            padding: 12px 0;
+            width: 100%;
             font-size: 1.2rem;
             font-weight: 700;
             border: none;
@@ -258,6 +268,7 @@
             cursor: pointer;
             box-shadow: 0 5px 0px #b78100;
             transition: all 0.1s;
+            text-align: center;
         }
 
         .btn-action:active {
@@ -265,13 +276,20 @@
             box-shadow: 0 1px 0px #b78100;
         }
 
+        /* Tombol Spesifik */
+        .btn-fullscreen {
+            background-color: #26a69a;
+            color: white;
+            box-shadow: 0 5px 0px #00695c;
+        }
+        .btn-fullscreen:active {
+            box-shadow: 0 1px 0px #00695c;
+        }
+
         .btn-leaderboard {
             background-color: #00e5ff;
             color: #004d40;
-            margin-top: 10px;
-            padding: 8px 25px;
-            font-size: 1rem;
-            box-shadow: 0 4px 0px #00b8d4;
+            box-shadow: 0 5px 0px #00b8d4;
         }
         .btn-leaderboard:active {
             box-shadow: 0 1px 0px #00b8d4;
@@ -292,7 +310,7 @@
         .score-box {
             font-size: 1.1rem;
             margin: 10px 0;
-            color: blue;
+            color: #455a64;
         }
 
         .save-form {
@@ -359,7 +377,6 @@
             text-transform: uppercase;
         }
 
-        /* Tabel Data Skor */
         .ranking-table {
             width: 100%;
             border-collapse: collapse;
@@ -386,7 +403,6 @@
             background-color: #f1f9ff;
         }
 
-        /* Mahkota Juara 1 */
         .ranking-table tr:nth-child(2) td:first-child {
             background-color: #fff8e1;
             color: #ffb300;
@@ -411,13 +427,17 @@
 </head>
 <body>
 
-    <div class="game-container">
+    <div class="game-container" id="main-fullscreen-area">
         
         <div class="overlay-screen" id="menu-screen">
             <h1>Detektif Peta Indonesia</h1>
             <p>Jelajahi seluruh 38 Provinsi. 5 Kesempatan Salah. Selesaikan secepat mungkin!</p>
-            <button class="btn-action" onclick="startGame()">MULAI GAME</button>
-            <button class="btn-action btn-leaderboard" onclick="bukaLeaderboard()">🏆 LIHAT TOP 5</button>
+            
+            <div class="menu-buttons">
+                <button class="btn-action" onclick="startGame()">MULAI GAME</button>
+                <button class="btn-action btn-fullscreen" id="btn-toggle-fs" onclick="toggleFullscreen()">🖥️ LAYAR PENUH</button>
+                <button class="btn-action btn-leaderboard" onclick="bukaLeaderboard()">🏆 LIHAT TOP 5</button>
+            </div>
         </div>
 
         <div class="top-panel">
@@ -460,8 +480,10 @@
                 <button class="btn-save" onclick="kirimKeGoogleSheet()">Simpan Skor Online</button>
             </div>
 
-            <button class="btn-action" id="btn-restart" onclick="startGame()">MAIN LAGI</button>
-            <button class="btn-action btn-leaderboard" onclick="bukaLeaderboard()">🏆 TOP 5 SKOR</button>
+            <div class="menu-buttons" style="margin-top: 10px;">
+                <button class="btn-action" id="btn-restart" onclick="startGame()">MAIN LAGI</button>
+                <button class="btn-action btn-leaderboard" onclick="bukaLeaderboard()">🏆 TOP 5 SKOR</button>
+            </div>
         </div>
 
         <div class="leaderboard-modal" id="modal-leaderboard">
@@ -489,14 +511,13 @@
     </div>
 
     <script>
-        // Masukkan URL Deployment Google Apps Script Anda di sini
+        // Masukkan URL Web App Google Apps Script Anda di sini
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwXkw2l3q7ro52hbTuX7HYBrcJddA7TrXjKe3sa13T0HRz9KZ13Jgl3gg_vgc2DbLRu5w/exec";
 
-        // Database ID grup dari file svgnusantara.html Anda
         const namaProvinsi = {
             "papuabaratdaya": "Papua Barat Daya",
             "papuabarat": "Papua Barat"
-            // Tambahkan translasi ID provinsi lainnya di bawah ini hingga 38 Provinsi lengkap
+            // Lengkapi dengan ID provinsi lainnya sesuai svgnusantara.html Anda
         };
 
         let daftarProvinsi = [];
@@ -551,7 +572,45 @@
                     panZoomInstance.resize(); panZoomInstance.fit(); panZoomInstance.center();
                 }
             });
+
+            // Pantau perubahan status fullscreen browser (bila user menekan tombol ESC bawaan keyboard)
+            document.addEventListener('fullscreenchange', handleFsChange);
+            document.addEventListener('webkitfullscreenchange', handleFsChange);
         });
+
+        /* --- FUNGSI FULLSCREEN Halaman Depan --- */
+        function toggleFullscreen() {
+            const elem = document.getElementById('main-fullscreen-area');
+
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                // Mencoba mengaktifkan layar penuh di berbagai tipe browser
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.webkitRequestFullscreen) { /* Safari / Chrome iOS */
+                    elem.webkitRequestFullscreen();
+                }
+            } else {
+                // Jika sudah full, maka keluar dari mode layar penuh
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }
+        }
+
+        function handleFsChange() {
+            const btnFs = document.getElementById('btn-toggle-fs');
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+                btnFs.innerText = "📺 KELUAR FULLSCREEN";
+            } else {
+                btnFs.innerText = "🖥️ LAYAR PENUH";
+            }
+            // Selaraskan ulang dimensi peta saat rasio ukuran layar berubah tajam
+            setTimeout(() => {
+                if(panZoomInstance) { panZoomInstance.resize(); panZoomInstance.fit(); panZoomInstance.center(); }
+            }, 300);
+        }
 
         function initPinchAndPan(svgElement) {
             const eventsHandler = {
@@ -625,7 +684,6 @@
             isChecking = false;
             updateHeartsDisplay();
 
-            // Sesi 38 Provinsi Acak tanpa berulang
             sesiSoal = [...daftarProvinsi].sort(() => Math.random() - 0.5);
             if (sesiSoal.length > 38) sesiSoal = sesiSoal.slice(0, 38); 
 
@@ -652,8 +710,6 @@
 
         function loadQuestion() {
             isChecking = false;
-            
-            // Mengembalikan warna papan soal ke kondisi default (Biru Muda) setelah proses cek selesai
             const papanSoal = document.getElementById('card-papan-soal');
             papanSoal.className = "instruction-card"; 
 
@@ -674,8 +730,6 @@
 
             if (idDiklik === targetAktif) {
                 skor += 25;
-                
-                // BERKEDIP HIJAU & PAPAN INSTRUKSI BERUBAH HIJAU KONTRAS TINGGI
                 papanSoal.classList.add('state-correct');
                 document.getElementById('hint-label-text').innerText = "Status:";
                 document.getElementById('target-display').innerText = "✨ JAWABAN BENAR! ✨";
@@ -694,8 +748,6 @@
             } else {
                 nyawa--;
                 updateHeartsDisplay();
-                
-                // BERKEDIP MERAH & PAPAN INSTRUKSI BERUBAH MERAH KONTRAS TINGGI (Teks sangat jelas dibaca)
                 papanSoal.classList.add('state-wrong');
                 document.getElementById('hint-label-text').innerText = "Evaluasi:";
                 
@@ -708,7 +760,6 @@
                     if (nyawa <= 0) {
                         endGame(false);
                     } else {
-                        // Soal tidak berganti sampai pilihan benar, kembalikan warna papan untuk mencoba lagi
                         isChecking = false;
                         papanSoal.className = "instruction-card"; 
                         document.getElementById('hint-label-text').innerText = "Cari & Sentuh:";
@@ -742,7 +793,7 @@
                 provinsi: indeksSoal,
                 skor: skor,
                 waktu: document.getElementById('timer-display').innerText,
-                detik: totalDetik // Mengirim total detik mentah untuk sorting di Apps Script
+                detik: totalDetik
             };
 
             const btnSave = document.querySelector('.btn-save');
@@ -767,37 +818,43 @@
             });
         }
 
-        /* --- FUNGSI BARU: MENU TOP 5 LEADERBOARD ONLINE --- */
         function bukaLeaderboard() {
             const containerTabel = document.getElementById('leaderboard-data-rows');
-            containerTabel.innerHTML = `<tr><td colspan="4" style="color: #0288d1; font-style: italic; padding: 20px;">Memuat data ....</td></tr>`;
+            containerTabel.innerHTML = `<tr><td colspan="4" style="color: #0288d1; font-style: italic; padding: 20px;">Meminta data ke Google Sheet...</td></tr>`;
             document.getElementById('modal-leaderboard').style.display = 'flex';
 
-            // Memanggil Apps Script dengan parameter GET action=getTop5
-            fetch(`${WEB_APP_URL}?action=getTop5`)
-                .then(response => response.json())
-                .then(data => {
-                    containerTabel.innerHTML = "";
-                    if (data.length === 0) {
-                        containerTabel.innerHTML = `<tr><td colspan="4" style="color: #888; padding: 20px;">Belum ada rekor tercatat.</td></tr>`;
-                        return;
-                    }
-                    // Loop maksimal 5 baris data teratas
-                    data.forEach((row, index) => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td>${index + 1} ${index === 0 ? '👑' : ''}</td>
-                            <td>${row.nama}</td>
-                            <td>${row.skor}</td>
-                            <td>${row.waktu || '00:00'}</td>
-                        `;
-                        containerTabel.appendChild(tr);
-                    });
-                })
-                .catch(err => {
-                    console.error(err);
-                    containerTabel.innerHTML = `<tr><td colspan="4" style="color: #f44336; padding: 20px;">Gagal memuat data online.</td></tr>`;
+            const fetchUrl = `${WEB_APP_URL}?action=getTop5&t=${new Date().getTime()}`;
+
+            fetch(fetchUrl, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Respon jaringan bermasalah.');
+                return response.json();
+            })
+            .then(data => {
+                containerTabel.innerHTML = "";
+                if (!data || data.length === 0 || data.status === "error") {
+                    containerTabel.innerHTML = `<tr><td colspan="4" style="color: #888; padding: 20px;">Belum ada rekor tercatat.</td></tr>`;
+                    return;
+                }
+                
+                data.forEach((row, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${index + 1} ${index === 0 ? '👑' : ''}</td>
+                        <td style="text-align: left; padding-left: 15px;">${row.nama || 'Tanpa Nama'}</td>
+                        <td>${row.skor}</td>
+                        <td>${row.waktu || '00:00'}</td>
+                    `;
+                    containerTabel.appendChild(tr);
                 });
+            })
+            .catch(err => {
+                console.error(err);
+                containerTabel.innerHTML = `<tr><td colspan="4" style="color: #f44336; padding: 20px;">Gagal memuat data online.</td></tr>`;
+            });
         }
 
         function tutupLeaderboard() {
