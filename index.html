@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
     <title>Kuis Peta Nusantara - 38 Provinsi</title>
+    <link rel="icon" type="image/png" href="favicon.png">    
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
@@ -30,14 +31,40 @@
             align-items: center;
         }
 
+        /* --- RASIO 16:9 RESPONSIVE --- */
         .game-container {
-            width: 100%;
-            height: 100%;
+            position: relative;
             background-color: #ffffff;
             display: flex;
             flex-direction: column;
-            position: relative;
             overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            border-radius: 8px; /* Sedikit lengkungan di pojok */
+        }
+
+        /* Media Query & Perhitungan Rasio untuk berbagai layar */
+        @media (min-aspect-ratio: 16/9) {
+            /* Layar Sangat Lebar (PC): Tinggi jadi patokan, lebar menyesuaikan 16:9 */
+            .game-container {
+                height: 90vh; /* Sisakan sedikit margin top/bottom */
+                width: calc(90vh * 16 / 9);
+            }
+        }
+
+        @media (max-aspect-ratio: 16/9) {
+            /* Layar HP/Tablet Kotak (Portrait/Square): Lebar jadi patokan, tinggi menyesuaikan 16:9 */
+            .game-container {
+                width: 95vw; /* Sisakan sedikit margin kiri/kanan */
+                height: calc(95vw * 9 / 16);
+            }
+        }
+
+        /* Fullscreen Mode override */
+        :fullscreen .game-container,
+        :-webkit-full-screen .game-container {
+            width: 100vw !important;
+            height: 100vh !important;
+            border-radius: 0;
         }
 
         /* --- PANEL ATAS --- */
@@ -102,7 +129,7 @@
             box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
         }
 
-        /* KARTU INSTRUKSI (Diperbaiki agar mendukung transisi warna kontras) */
+        /* KARTU INSTRUKSI */
         .instruction-card {
             background-color: #e1f5fe;
             border: 2px dashed #4fc3f7;
@@ -133,7 +160,7 @@
             transition: color 0.2s ease;
         }
 
-        /* State Warna Kontras Tinggi untuk Keterbacaan teks saat evaluasi */
+        /* State Warna Kontras Tinggi */
         .instruction-card.state-correct {
             background-color: #e8f5e9 !important;
             border-color: #81c784 !important;
@@ -146,7 +173,7 @@
             border-color: #e57373 !important;
         }
         .instruction-card.state-wrong .hint-label { color: #c62828 !important; }
-        .instruction-card.state-wrong .target-name { color: #b71c1c !important; } /* Teks MERAH GELAP di atas MERAH MUDA terang = Kontras Tinggi! */
+        .instruction-card.state-wrong .target-name { color: #b71c1c !important; }
 
         .control-group {
             display: flex;
@@ -198,6 +225,7 @@
 
         svg g path {
             transition: fill 0.15s ease;
+            cursor: pointer; /* Menunjukkan bisa diklik */
             pointer-events: auto;
         }
 
@@ -247,10 +275,21 @@
             color: #e1f5fe;
         }
 
+        /* Wadah Penyelaras Tombol Menu Depan */
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            width: 100%;
+            max-width: 300px;
+        }
+
         .btn-action {
             background-color: #ffb300;
             color: #4e3400;
-            padding: 12px 40px;
+            padding: 12px 0;
+            width: 100%;
             font-size: 1.2rem;
             font-weight: 700;
             border: none;
@@ -258,6 +297,7 @@
             cursor: pointer;
             box-shadow: 0 5px 0px #b78100;
             transition: all 0.1s;
+            text-align: center;
         }
 
         .btn-action:active {
@@ -265,13 +305,21 @@
             box-shadow: 0 1px 0px #b78100;
         }
 
+        /* Gaya Khusus Tombol Tambahan */
+        .btn-fullscreen {
+            background-color: #26a69a;
+            color: white;
+            box-shadow: 0 5px 0px #00695c;
+        }
+        .btn-fullscreen:active {
+            box-shadow: 0 1px 0px #00695c;
+        }
+
         .btn-leaderboard {
             background-color: #00e5ff;
             color: #004d40;
-            margin-top: 10px;
-            padding: 8px 25px;
-            font-size: 1rem;
-            box-shadow: 0 4px 0px #00b8d4;
+            margin-top: 0; /* Dinormalisasi untuk layout vertikal menu-buttons */
+            box-shadow: 0 5px 0px #00b8d4;
         }
         .btn-leaderboard:active {
             box-shadow: 0 1px 0px #00b8d4;
@@ -359,7 +407,6 @@
             text-transform: uppercase;
         }
 
-        /* Tabel Data Skor */
         .ranking-table {
             width: 100%;
             border-collapse: collapse;
@@ -386,7 +433,6 @@
             background-color: #f1f9ff;
         }
 
-        /* Mahkota Juara 1 */
         .ranking-table tr:nth-child(2) td:first-child {
             background-color: #fff8e1;
             color: #ffb300;
@@ -409,15 +455,17 @@
         }
     </style>
 </head>
-<body>
-
-    <div class="game-container">
+<body oncontextmenu="return false;"> <div class="game-container" id="main-fullscreen-area">
         
         <div class="overlay-screen" id="menu-screen">
             <h1>Detektif Peta Indonesia</h1>
-            <p>Jelajahi seluruh 38 Provinsi. 5 Kesempatan Salah. Selesaikan secepat mungkin!</p>
-            <button class="btn-action" onclick="startGame()">MULAI GAME</button>
-            <button class="btn-action btn-leaderboard" onclick="bukaLeaderboard()">🏆 LIHAT TOP 5</button>
+            <p>Temukan Lokasi 38 Provinsi di Indonesia dalam peta</p>
+            
+            <div class="menu-buttons">
+                <button class="btn-action" onclick="startGame()">MULAI</button>
+                <button class="btn-action btn-fullscreen" id="btn-toggle-fs" onclick="toggleFullscreen()">🖥️ LAYAR PENUH</button>
+                <button class="btn-action btn-leaderboard" onclick="bukaLeaderboard()">🏆 LIHAT TOP 5</button>
+            </div>
         </div>
 
         <div class="top-panel">
@@ -460,8 +508,11 @@
                 <button class="btn-save" onclick="kirimKeGoogleSheet()">Simpan Skor Online</button>
             </div>
 
-            <button class="btn-action" id="btn-restart" onclick="startGame()">MAIN LAGI</button>
-            <button class="btn-action btn-leaderboard" onclick="bukaLeaderboard()">🏆 TOP 5 SKOR</button>
+            <div class="menu-buttons" style="margin-top: 10px;">
+                <button class="btn-action" id="btn-restart" onclick="startGame()">MAIN LAGI</button>
+                <button class="btn-action btn-leaderboard" onclick="bukaLeaderboard()">🏆 TOP 5 SKOR</button>
+                <button class="btn-action" onclick="document.getElementById('menu-screen').style.display = 'flex'; document.getElementById('result-screen').style.display = 'none';">MENU</button>
+            </div>
         </div>
 
         <div class="leaderboard-modal" id="modal-leaderboard">
@@ -489,14 +540,11 @@
     </div>
 
     <script>
-        // Masukkan URL Deployment Google Apps Script Anda di sini
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwXkw2l3q7ro52hbTuX7HYBrcJddA7TrXjKe3sa13T0HRz9KZ13Jgl3gg_vgc2DbLRu5w/exec";
 
-        // Database ID grup dari file svgnusantara.html Anda
         const namaProvinsi = {
             "papuabaratdaya": "Papua Barat Daya",
             "papuabarat": "Papua Barat"
-            // Tambahkan translasi ID provinsi lainnya di bawah ini hingga 38 Provinsi lengkap
         };
 
         let daftarProvinsi = [];
@@ -551,8 +599,42 @@
                     panZoomInstance.resize(); panZoomInstance.fit(); panZoomInstance.center();
                 }
             });
+
+            // Listener pendeteksi perubahan status fullscreen
+            document.addEventListener('fullscreenchange', handleFsChange);
+            document.addEventListener('webkitfullscreenchange', handleFsChange);
+
+            // CEGAH SALIN TEKS (Copy)
+            document.addEventListener('copy', (e) => { e.preventDefault(); return false; });
+            // CEGAH SERET GAMBAR/ELEMEN
+            document.addEventListener('dragstart', (e) => { e.preventDefault(); return false; });
         });
 
+        /* --- LOGIKA LAYAR PENUH --- */
+        function toggleFullscreen() {
+            const elem = document.getElementById('main-fullscreen-area');
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                if (elem.requestFullscreen) { elem.requestFullscreen(); } 
+                else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
+            } else {
+                if (document.exitFullscreen) { document.exitFullscreen(); } 
+                else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
+            }
+        }
+
+        function handleFsChange() {
+            const btnFs = document.getElementById('btn-toggle-fs');
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+                btnFs.innerText = "📺 KELUAR FULLSCREEN";
+            } else {
+                btnFs.innerText = "🖥️ LAYAR PENUH";
+            }
+            setTimeout(() => {
+                if(panZoomInstance) { panZoomInstance.resize(); panZoomInstance.fit(); panZoomInstance.center(); }
+            }, 300);
+        }
+
+        /* --- LOGIKA DUA MODE: MOUSE & TOUCHSCREEN ( HammerJS Universal ) --- */
         function initPinchAndPan(svgElement) {
             const eventsHandler = {
                 haltEventListeners: ['touchstart', 'touchend', 'touchmove', 'touchleave', 'touchcancel'],
@@ -560,8 +642,9 @@
                     const instance = options.instance;
                     let initialScale = 1; let pannedX = 0; let pannedY = 0;
 
+                    // Menggunakan PointerEventInput agar mendeteksi mouse dan sentuhan secara universal
                     this.hammer = Hammer(options.svgElement, {
-                        inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchInput
+                        inputClass: Hammer.SUPPORT_POINTER_EVENTS ? Hammer.PointerEventInput : Hammer.TouchAllInput
                     });
                     this.hammer.get('pinch').set({enable: true});
 
@@ -576,7 +659,11 @@
                         instance.zoomAtPoint(initialScale * ev.scale, {x: ev.center.x, y: ev.center.y});
                     });
 
+                    // Event handler 'tap' dioptimalkan untuk klik mouse kiri & sentuhan jari tanpa delay/ganda
                     this.hammer.on('tap', function(ev) {
+                        // Jika dipicu mouse, pastikan hanya merespons klik kiri utama (cegah klik tengah/kanan memicu tap)
+                        if (ev.pointerType === 'mouse' && ev.srcEvent.button !== 0) return;
+
                         const targetPath = ev.target;
                         const targetGroup = targetPath.closest('g'); 
                         if (targetGroup) {
@@ -587,7 +674,9 @@
                         }
                     });
 
-                    options.svgElement.addEventListener('touchmove', function(e){ e.preventDefault(); }, {passive: false});
+                    options.svgElement.addEventListener('touchmove', function(e){ 
+                        if(e.scale !== 1) { e.preventDefault(); } 
+                    }, {passive: false});
                 },
                 destroy: function() { this.hammer.destroy(); }
             };
@@ -625,7 +714,6 @@
             isChecking = false;
             updateHeartsDisplay();
 
-            // Sesi 38 Provinsi Acak tanpa berulang
             sesiSoal = [...daftarProvinsi].sort(() => Math.random() - 0.5);
             if (sesiSoal.length > 38) sesiSoal = sesiSoal.slice(0, 38); 
 
@@ -652,8 +740,6 @@
 
         function loadQuestion() {
             isChecking = false;
-            
-            // Mengembalikan warna papan soal ke kondisi default (Biru Muda) setelah proses cek selesai
             const papanSoal = document.getElementById('card-papan-soal');
             papanSoal.className = "instruction-card"; 
 
@@ -674,8 +760,6 @@
 
             if (idDiklik === targetAktif) {
                 skor += 25;
-                
-                // BERKEDIP HIJAU & PAPAN INSTRUKSI BERUBAH HIJAU KONTRAS TINGGI
                 papanSoal.classList.add('state-correct');
                 document.getElementById('hint-label-text').innerText = "Status:";
                 document.getElementById('target-display').innerText = "✨ JAWABAN BENAR! ✨";
@@ -694,8 +778,6 @@
             } else {
                 nyawa--;
                 updateHeartsDisplay();
-                
-                // BERKEDIP MERAH & PAPAN INSTRUKSI BERUBAH MERAH KONTRAS TINGGI (Teks sangat jelas dibaca)
                 papanSoal.classList.add('state-wrong');
                 document.getElementById('hint-label-text').innerText = "Evaluasi:";
                 
@@ -708,7 +790,6 @@
                     if (nyawa <= 0) {
                         endGame(false);
                     } else {
-                        // Soal tidak berganti sampai pilihan benar, kembalikan warna papan untuk mencoba lagi
                         isChecking = false;
                         papanSoal.className = "instruction-card"; 
                         document.getElementById('hint-label-text').innerText = "Cari & Sentuh:";
@@ -742,7 +823,7 @@
                 provinsi: indeksSoal,
                 skor: skor,
                 waktu: document.getElementById('timer-display').innerText,
-                detik: totalDetik // Mengirim total detik mentah untuk sorting di Apps Script
+                detik: totalDetik
             };
 
             const btnSave = document.querySelector('.btn-save');
@@ -767,13 +848,11 @@
             });
         }
 
-        /* --- FUNGSI BARU: MENU TOP 5 LEADERBOARD ONLINE --- */
         function bukaLeaderboard() {
             const containerTabel = document.getElementById('leaderboard-data-rows');
             containerTabel.innerHTML = `<tr><td colspan="4" style="color: #0288d1; font-style: italic; padding: 20px;">Memuat data ....</td></tr>`;
             document.getElementById('modal-leaderboard').style.display = 'flex';
 
-            // Memanggil Apps Script dengan parameter GET action=getTop5
             fetch(`${WEB_APP_URL}?action=getTop5`)
                 .then(response => response.json())
                 .then(data => {
@@ -782,7 +861,6 @@
                         containerTabel.innerHTML = `<tr><td colspan="4" style="color: #888; padding: 20px;">Belum ada rekor tercatat.</td></tr>`;
                         return;
                     }
-                    // Loop maksimal 5 baris data teratas
                     data.forEach((row, index) => {
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
